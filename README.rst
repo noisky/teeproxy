@@ -17,5 +17,5 @@ all source code are licensed under Apache-2.0.
    :target: LICENSE
 .. |reposize-badge| image:: https://img.shields.io/github/repo-size/zengxs/teeproxy?logo=git
    :alt: Git repo size
-.. |build-badge| image:: https://github.com/zengxs/teeproxy/workflows/.github/workflows/build.yaml/badge.svg
+.. |build-badge| image:: https://img.shields.io/github/workflow/status/zengxs/teeproxy/build?logo=github
    :alt: build status

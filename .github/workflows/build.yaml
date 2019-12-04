@@ -9,25 +9,40 @@ jobs:
       matrix:
         rust: [stable, nightly]
 
-    if: "!contains(github.event.head_commit.message, '[ci skip]')"
-
     steps:
     - uses: actions/checkout@v1
+      if: "!contains(github.event.head_commit.message, '[ci skip]')"
 
     - name: Install rust toolchain ${{ matrix.rust }}
       uses: actions-rs/toolchain@v1
       with:
         toolchain: ${{ matrix.rust }}
         override: true
+      if: success()
 
     - name: Run build
       uses: actions-rs/cargo@v1
       with:
         command: build
         args: --release --all-features
+      if: success()
 
     - name: Run tests
       uses: actions-rs/cargo@v1
       with:
         command: test
         args: --release --all-features
+      if: success()
+
+    - name: Install binaries
+      uses: actions-rs/cargo@v1
+      with:
+        command: install
+        args: --all-features --path . --root ./dist
+      if: success() && matrix.rust == 'stable'
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: teeproxy
+        path: ./dist
+      if: success()
