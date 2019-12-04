@@ -45,4 +45,4 @@ jobs:
       with:
         name: teeproxy
         path: ./dist
-      if: success()
+      if: success() && matrix.rust == 'stable'
