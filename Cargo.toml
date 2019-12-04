@@ -1,0 +1,25 @@
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package]
+name = "teeproxy"
+version = "0.0.1"
+authors = ["Tseng Hsiang Sung <i@zengxs.com>"]
+edition = "2018"
+readme = "README.md"
+license = "Apache-2.0"
+
+[dependencies]
+log = "0.4.*"
+clap = { version = "2.33.*", optional = true }
+env_logger = { version = "0.7.*", optional = true }
+
+[features]
+cli = ["env_logger", "clap"]
+
+[lib]
+name = "teeproxy"
+crate-type = ["cdylib", "staticlib"]
+
+[[bin]]
+name = "teeproxy"
+path = "src/bin/cli.rs"
+required-features = ["cli"]
