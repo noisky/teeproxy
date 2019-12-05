@@ -4,14 +4,40 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         rust: [stable, nightly]
+
+    runs-on: ${{ matrix.os }}
+
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+
+    env:
+      # vcpkg openssl installation location
+      X86_64_PC_WINDOWS_MSVC_OPENSSL_DIR: C:/vcpkg/packages/openssl-windows_x64-windows-static
 
     steps:
     - uses: actions/checkout@v1
-      if: "!contains(github.event.head_commit.message, '[ci skip]')"
+
+    - name: Cache windows vcpkg openssl
+      id: cache-vcpkg-openssl
+      uses: actions/cache@v1
+      with:
+        path: C:/vcpkg/packages
+        key: windows-vcpkg-openssl-1.0.2s
+      if: success() && runner.os == 'Windows'
+
+    - name: Cache cargo build
+      uses: actions/cache@v1
+      with:
+        path: target
+        key: ${{ runner.os }}-${{ matrix.rust }}-cargo-build-target-${{ hashFiles('**/Cargo.toml') }}
+      if: success()
+
+    - name: Install OpenSSL for Windows
+      run: vcpkg install openssl-windows:x64-windows-static
+      if: success() && runner.os == 'Windows' && steps.cache-vcpkg-openssl.outputs.cache-hit != 'true'
 
     - name: Install rust toolchain ${{ matrix.rust }}
       uses: actions-rs/toolchain@v1
@@ -33,16 +59,3 @@ jobs:
         command: test
         args: --release --all-features
       if: success()
-
-    - name: Install binaries
-      uses: actions-rs/cargo@v1
-      with:
-        command: install
-        args: --all-features --path . --root ./dist
-      if: success() && matrix.rust == 'stable'
-
-    - uses: actions/upload-artifact@v1
-      with:
-        name: teeproxy
-        path: ./dist
-      if: success() && matrix.rust == 'stable'
